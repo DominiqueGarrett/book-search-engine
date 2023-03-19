@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
+
 import Auth from '../utils/auth';
-// refractor to use Apollo GraphQL API instead of RESTful API
-import { useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/react-hooks';
 import { ADD_USER } from '../utils/mutations';
+
 
 const SignupForm = () => {
   // set initial form state
@@ -12,10 +13,8 @@ const SignupForm = () => {
   const [validated] = useState(false);
   // set state for alert
   const [showAlert, setShowAlert] = useState(false);
-
-  // get a function 'addUser' returned by useMutation hook 
-  // to execute the ADD_USER mutation in the functions below
-  const [addUser, { loading }] = useMutation(ADD_USER);
+  // define mutation for adding a user
+  const [createUser] = useMutation(ADD_USER);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -33,14 +32,13 @@ const SignupForm = () => {
     }
 
     try {
-      const {data} = await addUser(
-        {
-          variables: userFormData
-        }
-      );
+      const { data } = await createUser({
+        variables: { ...userFormData }
+      });
+
       Auth.login(data.addUser.token);
     } catch (err) {
-      console.log(err);
+      console.error(err);
       setShowAlert(true);
     }
 
@@ -50,10 +48,6 @@ const SignupForm = () => {
       password: '',
     });
   };
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <>

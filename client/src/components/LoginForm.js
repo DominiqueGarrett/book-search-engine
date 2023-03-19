@@ -1,18 +1,16 @@
+// see SignupForm.js for comments
 import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
-import Auth from '../utils/auth';
 
-// refactored to use GraphQL API instead of RESTful API
-import { useMutation } from '@apollo/client';
+import Auth from '../utils/auth';
+import { useMutation } from '@apollo/react-hooks';
 import { LOGIN_USER } from '../utils/mutations';
 
 const LoginForm = () => {
   const [userFormData, setUserFormData] = useState({ email: '', password: '' });
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
-  
-  // refactored to use GraphQL API instead of RESTful API
-  const [login, { loading }] = useMutation(LOGIN_USER);
+  const [loginUser] = useMutation(LOGIN_USER);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -30,11 +28,10 @@ const LoginForm = () => {
     }
 
     try {
-      const {data} = await login(
-        {
-          variables: userFormData,
-        }
-      );
+      const { data } = await loginUser({
+        variables: {...userFormData} 
+      });
+
       Auth.login(data.login.token);
     } catch (err) {
       console.error(err);
@@ -47,10 +44,6 @@ const LoginForm = () => {
       password: '',
     });
   };
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <>
